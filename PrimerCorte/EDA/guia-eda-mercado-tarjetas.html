@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Del Mercado de Tarjetas al EDA — Guía del Instructor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EAE1CB;
+    --paper-line: #C9BC9C;
+    --card-bg: #F7F1E2;
+    --ink: #23261F;
+    --ink-soft: #4B4A3E;
+    --margin-red: #AE4536;
+    --colab-amber: #C97C2E;
+    --excel-blue: #2C5F74;
+    --max: 940px;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } *{ animation:none !important; transition:none !important; } }
+
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--paper-line) 28px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+  }
+  body::before{
+    content:"";
+    position:fixed; top:0; bottom:0; left:calc(50% - var(--max)/2 + 64px);
+    width:2px; background:var(--margin-red); opacity:.35;
+    display:block;
+  }
+  @media (max-width: 720px){ body::before{ left:28px; } }
+
+  .wrap{ max-width:var(--max); margin:0 auto; padding:0 24px 80px; position:relative; }
+
+  header.hero{ padding:64px 0 32px; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:.78rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--margin-red); font-weight:600;
+  }
+  h1{
+    font-family:'Fraunces', serif; font-weight:700; font-size:clamp(2.1rem, 5vw, 3.2rem);
+    margin:.4rem 0 .6rem; line-height:1.05;
+  }
+  .hero p{ max-width:56ch; color:var(--ink-soft); font-size:1.05rem; }
+
+  .stamp-row{ display:flex; gap:14px; margin-top:1.6rem; flex-wrap:wrap; }
+  .stamp{
+    font-family:'IBM Plex Mono', monospace; font-size:.76rem; letter-spacing:.05em;
+    border:1.5px solid var(--ink); border-radius:3px; padding:6px 12px;
+    transform:rotate(-1.5deg); background:var(--card-bg);
+  }
+
+  section.recap{
+    background:var(--card-bg); border:1px solid var(--paper-line); border-radius:4px;
+    padding:1.6rem 1.8rem; margin:2rem 0; border-left:4px solid var(--ink);
+  }
+  section.recap h2{ font-family:'Fraunces',serif; font-size:1.15rem; margin:0 0 .5rem; }
+  section.recap p{ margin:0; color:var(--ink-soft); font-size:.95rem; }
+
+  section.dataset{ margin:2.5rem 0; }
+  section.dataset h2{ font-family:'Fraunces',serif; font-size:1.3rem; margin-bottom:.3rem; }
+  section.dataset .sub{ color:var(--ink-soft); font-size:.9rem; margin-bottom:1rem; }
+  .table-scroll{ overflow-x:auto; border:1px solid var(--paper-line); border-radius:4px; }
+  table{ border-collapse:collapse; width:100%; min-width:720px; font-family:'IBM Plex Mono', monospace; font-size:.78rem; background:var(--card-bg); }
+  th,td{ border:1px solid var(--paper-line); padding:8px 10px; text-align:left; white-space:nowrap; }
+  th{ background:var(--ink); color:var(--paper); font-weight:500; letter-spacing:.03em; }
+  td.flag{ background:#F1DCD6; color:var(--margin-red); font-weight:600; }
+  .flags-legend{ display:flex; gap:18px; flex-wrap:wrap; margin-top:.7rem; font-size:.8rem; color:var(--ink-soft); }
+  .flags-legend span::before{ content:"■ "; color:var(--margin-red); }
+
+  main.steps{ margin-top:3rem; }
+  .step{
+    position:relative; background:var(--card-bg); border:1px solid var(--paper-line);
+    border-radius:4px; padding:2.6rem 2rem 2.2rem; margin-bottom:3.4rem;
+  }
+  .step::before{
+    content:""; position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    width:13px; height:13px; border-radius:50%; background:var(--paper);
+    box-shadow:-42px 0 0 var(--paper), 42px 0 0 var(--paper), -84px 0 0 var(--paper), 84px 0 0 var(--paper);
+  }
+  .step-number{
+    position:absolute; top:-20px; left:28px; width:54px; height:54px; border:3px solid var(--ink);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; font-size:1.3rem; background:var(--card-bg);
+    transform:rotate(-7deg); color:var(--ink);
+  }
+  .step h3{ font-family:'Fraunces',serif; font-size:1.5rem; margin:.6rem 0 .3rem 0; }
+  .step .goal{ color:var(--ink-soft); font-size:.95rem; margin-bottom:.3rem; }
+  .step .question{
+    font-family:'IBM Plex Mono', monospace; font-size:.85rem; color:var(--margin-red);
+    margin:.4rem 0 1.2rem;
+  }
+  .step .question::before{ content:"❯ "; }
+
+  .paths{ display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+  @media (max-width: 760px){ .paths{ grid-template-columns:1fr; } }
+
+  .path{ border-radius:5px; padding:1.15rem 1.25rem 1.3rem; }
+  .path .label{
+    font-family:'IBM Plex Mono', monospace; font-size:.72rem; letter-spacing:.1em;
+    text-transform:uppercase; font-weight:600; margin-bottom:.7rem; display:block;
+  }
+  .path-colab{ background:var(--ink); color:#EDE6D3; border-left:4px solid var(--colab-amber); }
+  .path-colab .label{ color:var(--colab-amber); }
+  .path-colab pre{
+    background:#181A14; border-radius:4px; padding:.8rem .9rem; overflow-x:auto;
+    font-family:'IBM Plex Mono', monospace; font-size:.78rem; margin:0 0 .6rem; color:#EDE6D3;
+  }
+  .path-colab p{ font-size:.85rem; color:#CFC9B4; margin:.4rem 0; }
+
+  .path-excel{ background:#fff; border:1px solid var(--paper-line); border-left:4px solid var(--excel-blue); }
+  .path-excel .label{ color:var(--excel-blue); }
+  .path-excel ol{ margin:0; padding-left:1.15rem; font-size:.87rem; }
+  .path-excel li{ margin-bottom:.55rem; }
+  .path-excel code{
+    font-family:'IBM Plex Mono', monospace; background:#EFF4F6; border:1px solid #D7E2E6;
+    padding:1px 5px; border-radius:3px; font-size:.82rem; color:var(--excel-blue);
+  }
+
+  footer.closing{
+    margin-top:3rem; background:var(--ink); color:var(--paper); border-radius:6px;
+    padding:2rem 2.2rem;
+  }
+  footer.closing h2{ font-family:'Fraunces',serif; font-size:1.3rem; margin-top:0; color:#F2E9D2; }
+  footer.closing ul{ padding-left:1.2rem; font-size:.92rem; }
+  footer.closing li{ margin-bottom:.5rem; }
+
+  .print-btn{
+    position:fixed; bottom:22px; right:22px; font-family:'IBM Plex Mono', monospace;
+    font-size:.8rem; letter-spacing:.04em; background:var(--ink); color:var(--paper);
+    border:none; border-radius:30px; padding:12px 20px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,.25);
+  }
+  .print-btn:hover{ background:var(--margin-red); }
+  .print-btn:focus-visible{ outline:3px solid var(--colab-amber); outline-offset:2px; }
+  @media print{ .print-btn{ display:none; } body::before{ display:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Guía del instructor · ETL &amp; EDA</div>
+    <h1>Del mercado de tarjetas al análisis exploratorio</h1>
+    <p>Fase 2 de la actividad: convertir el registro de ventas generado en clase en un ejercicio guiado de EDA, con dos rutas paralelas — Google Colab y Excel/Sheets — para que cada grupo elija su herramienta.</p>
+    <div class="stamp-row">
+      <div class="stamp">⏱ 60–70 min</div>
+      <div class="stamp">👥 Trabajo por grupos</div>
+      <div class="stamp">🎫 6 pasos</div>
+    </div>
+  </header>
+
+  <section class="recap">
+    <h2>Recordatorio — Fase 1 (ya realizada)</h2>
+    <p>Cada grupo diseñó 5–6 tarjetas de producto y las vendió en 3 rondas de mercado, registrando cada transacción en una tabla compartida. Ese registro es el dataset crudo que se explora a continuación.</p>
+  </section>
+
+  <section class="dataset">
+    <h2>Dataset de ejemplo</h2>
+    <div class="sub">Así se ve el registro consolidado que proyectas al inicio del ejercicio (con errores reales intencionalmente sin corregir).</div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>id_venta</th><th>vendedor</th><th>comprador</th><th>producto</th><th>categoría</th><th>precio_lista</th><th>precio_venta</th><th>cantidad</th><th>calificación</th><th>ronda</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Grupo A</td><td>Grupo C</td><td>Termo Acero 500ml</td><td>Hogar</td><td>25000</td><td>22000</td><td>2</td><td>4</td><td>1</td></tr>
+          <tr><td>2</td><td>Grupo B</td><td>Grupo A</td><td>Audífonos BT Mini</td><td>Tecnología</td><td>60000</td><td>65000</td><td>1</td><td>5</td><td>1</td></tr>
+          <tr><td>3</td><td>Grupo C</td><td>Grupo B</td><td>Cuaderno Ecológico</td><td>Papelería</td><td>8000</td><td>8000</td><td>3</td><td>3</td><td>1</td></tr>
+          <tr><td>4</td><td>Grupo A</td><td>Grupo B</td><td>Termo Acero 500ml</td><td>Hogar</td><td class="flag">25.000</td><td>20000</td><td>1</td><td>4</td><td>2</td></tr>
+          <tr><td>5</td><td>Grupo B</td><td>Grupo C</td><td>Powerbank 10000mAh</td><td>Tecnología</td><td>45000</td><td class="flag">(vacío)</td><td>1</td><td>4</td><td>2</td></tr>
+          <tr><td>6</td><td>Grupo C</td><td>Grupo A</td><td>Cuaderno Ecológico</td><td>Papelería</td><td>8000</td><td>8000</td><td>3</td><td>3</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="flags-legend">
+      <span>Fila 4: formato de precio inconsistente</span>
+      <span>Fila 5: valor faltante</span>
+      <span>Fila 6: duplicado de la fila 3</span>
+    </div>
+  </section>
+
+  <main class="steps">
+
+    <article class="step">
+      <div class="step-number">1</div>
+      <h3>Entendimiento inicial</h3>
+      <div class="goal">Reconocer el tamaño y la estructura del dataset antes de tocar nada.</div>
+      <div class="question">¿Cuántas filas y columnas hay, y qué tipo de dato es cada una?</div>
+      <div class="paths">
+        <div class="path path-colab">
+          <span class="label">Ruta A · Google Colab</span>
+          <pre>import pandas as pd
+
+df = pd.read_csv("ventas_mercado.csv")
+df.shape
+df.dtypes
+df.head()</pre>
+          <p>Revisa si pandas leyó <code style="color:#EDE6D3;background:none;">precio_venta</code> como texto en vez de número — es señal de que ya hay ruido en los datos.</p>
+        </div>
+        <div class="path path-excel">
+          <span class="label">Ruta B · Excel / Sheets</span>
+          <ol>
+            <li>Abre la tabla y presiona <code>Ctrl+Fin</code> para ver el rango total (última fila y columna con datos).</li>
+            <li>Revisa el encabezado: identifica a simple vista qué columnas son texto, cuáles numéricas y cuáles categóricas.</li>
+            <li>Ve a <code>Vista → Inmovilizar → Fila 1</code> para fijar el encabezado mientras exploras.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-number">2</div>
+      <h3>Calidad de datos</h3>
+      <div class="goal">Encontrar lo que no se puede confiar tal como está.</div>
+      <div class="question">¿Qué venta no podríamos usar sin corregirla primero?</div>
+      <div class="paths">
+        <div class="path path-colab">
+          <span class="label">Ruta A · Google Colab</span>
+          <pre>df.isnull().sum()
+df.duplicated().sum()
+
+df['precio_venta'] = (df['precio_venta']
+    .astype(str)
+    .str.replace('.', '', regex=False)
+    .str.replace(',', '.', regex=False))
+df['precio_venta'] = pd.to_numeric(df['precio_venta'], errors='coerce')
+
+df = df.drop_duplicates()</pre>
+        </div>
+        <div class="path path-excel">
+          <span class="label">Ruta B · Excel / Sheets</span>
+          <ol>
+            <li><code>Ctrl+H</code> (Buscar y reemplazar) para unificar el formato de precios.</li>
+            <li>Selecciona la columna de precios → <code>Formato condicional → Está en blanco</code> para resaltar valores faltantes.</li>
+            <li><code>Datos → Quitar duplicados</code>, marcando todas las columnas.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-number">3</div>
+      <h3>Análisis univariado</h3>
+      <div class="goal">Describir cada variable por separado antes de cruzarlas.</div>
+      <div class="question">¿Alguna venta tiene un precio que no encaja con el resto?</div>
+      <div class="paths">
+        <div class="path path-colab">
+          <span class="label">Ruta A · Google Colab</span>
+          <pre>df['precio_venta'].describe()
+df['categoria'].value_counts().plot(kind='bar')
+df.boxplot(column='precio_venta')</pre>
+        </div>
+        <div class="path path-excel">
+          <span class="label">Ruta B · Excel / Sheets</span>
+          <ol>
+            <li>Tabla dinámica: <code>categoría</code> en filas, <code>Recuento de producto</code> en valores → gráfico de columnas.</li>
+            <li>Tabla dinámica: valores de <code>precio_venta</code> con Promedio, Mínimo y Máximo.</li>
+            <li><code>Insertar → Gráficos estadísticos → Caja y bigotes</code> sobre <code>precio_venta</code> para ver outliers.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-number">4</div>
+      <h3>Análisis bivariado</h3>
+      <div class="goal">Cruzar variables para buscar relaciones y comparar grupos.</div>
+      <div class="question">¿Qué categoría vende más caro y qué vendedor generó más ingresos?</div>
+      <div class="paths">
+        <div class="path path-colab">
+          <span class="label">Ruta A · Google Colab</span>
+          <pre>df.plot.scatter(x='cantidad', y='precio_venta')
+
+df.groupby('categoria')['precio_venta'].mean().plot(kind='bar')
+
+df.groupby('vendedor')['precio_venta'] \
+  .sum().sort_values(ascending=False)</pre>
+        </div>
+        <div class="path path-excel">
+          <span class="label">Ruta B · Excel / Sheets</span>
+          <ol>
+            <li>Gráfico de dispersión XY: <code>cantidad</code> vs <code>precio_venta</code>.</li>
+            <li>Tabla dinámica: <code>categoría</code> en filas, Promedio de <code>precio_venta</code> en valores.</li>
+            <li>Tabla dinámica: <code>vendedor</code> en filas, Suma de <code>precio_venta</code>, ordenada de mayor a menor.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-number">5</div>
+      <h3>Correlación</h3>
+      <div class="goal">Cuantificar si dos variables se mueven juntas.</div>
+      <div class="question">¿Los productos mejor calificados se vendieron más caros?</div>
+      <div class="paths">
+        <div class="path path-colab">
+          <span class="label">Ruta A · Google Colab</span>
+          <pre>df[['precio_venta', 'calificacion']].corr()
+df.plot.scatter(x='calificacion', y='precio_venta')</pre>
+        </div>
+        <div class="path path-excel">
+          <span class="label">Ruta B · Excel / Sheets</span>
+          <ol>
+            <li><code>=COEF.DE.CORREL(rango_precio; rango_calificacion)</code></li>
+            <li>Gráfico de dispersión con <code>calificación</code> en X y <code>precio_venta</code> en Y.</li>
+            <li>Clic derecho sobre la serie → <code>Agregar línea de tendencia</code> para ver la dirección de la relación.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-number">6</div>
+      <h3>Conclusiones</h3>
+      <div class="goal">Cerrar el ciclo EDA con hallazgos comunicables.</div>
+      <div class="question">¿Qué le dirías a un vendedor real con estos datos?</div>
+      <div class="paths">
+        <div class="path path-colab">
+          <span class="label">Ruta A · Google Colab</span>
+          <p>Cada grupo agrega una celda Markdown con:</p>
+          <p>· 2 hallazgos respaldados por un gráfico o número<br>· 1 hipótesis para validar más adelante (ej. con un modelo)</p>
+        </div>
+        <div class="path path-excel">
+          <span class="label">Ruta B · Excel / Sheets</span>
+          <ol>
+            <li>Crear una hoja "Conclusiones" con 2 hallazgos, citando la tabla dinámica o gráfico que los sustenta.</li>
+            <li>Escribir 1 hipótesis para validar en una siguiente clase.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <footer class="closing">
+    <h2>Notas para el instructor</h2>
+    <ul>
+      <li>Si el tiempo aprieta, deja los pasos 5 y 6 como cierre grupal en plenaria en lugar de trabajo por equipos.</li>
+      <li>Los grupos que usen Colab pueden exportar su notebook y los de Excel su hoja: ambos entregan lo mismo, un mini-reporte de EDA.</li>
+      <li>Vale la pena dejar los errores de la fila 4–6 sin corregir de antemano: son el gancho real hacia el paso 2.</li>
+    </ul>
+  </footer>
+
+</div>
+
+<button class="print-btn" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+
+</body>
+</html>
