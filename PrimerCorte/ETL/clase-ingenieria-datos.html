@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase: Ingeniería de Datos — Introducción, ETL y EDA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF8F4;
+    --card:#FFFFFF;
+    --ink:#1E2430;
+    --ink-soft:#5B6472;
+    --line:#E4E0D6;
+
+    --s0:#9CA3AF; /* actividad inicial — dato crudo */
+    --s1:#6B8CAE; /* bloque 1 — panorama */
+    --s2:#2C7A7B; /* bloque 2 — ETL / transformación */
+    --s3:#3F8F6E; /* bloque 3 — EDA / hallazgo */
+    --s4:#C9A227; /* cierre — dato refinado */
+
+    --code-bg:#1E2430;
+    --code-text:#E8E6DF;
+    --code-accent:#C9A227;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px 80px;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:56px 24px 32px;
+    max-width:920px;
+    margin:0 auto;
+  }
+  header.hero h1{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    font-size:clamp(28px,4vw,42px);
+    line-height:1.15;
+    margin:14px 0 10px;
+    letter-spacing:-.01em;
+  }
+  header.hero p.lede{
+    font-size:17px;
+    color:var(--ink-soft);
+    max-width:60ch;
+    margin:0 0 34px;
+  }
+  header.hero .meta{
+    display:flex;
+    gap:28px;
+    flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:38px;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:14px 0;
+  }
+  header.hero .meta strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- PIPELINE TIMELINE (signature element) ---------- */
+  .pipeline{width:100%;}
+  .pipeline-bar{
+    display:flex;
+    width:100%;
+    height:14px;
+    border-radius:7px;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(30,36,48,.08);
+  }
+  .pipeline-bar span{display:block;height:100%;}
+  .pipeline-labels{
+    display:flex;
+    width:100%;
+    margin-top:10px;
+  }
+  .pipeline-labels div{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    line-height:1.4;
+  }
+  .pipeline-labels div b{
+    display:block;
+    color:var(--ink);
+    font-size:12.5px;
+    font-weight:600;
+  }
+  .pipeline-labels div span.min{
+    display:block;
+    margin-top:1px;
+  }
+
+  /* ---------- SECTIONS AS PIPELINE STAGES ---------- */
+  section.stage{
+    position:relative;
+    margin:0 0 6px;
+    padding:38px 0 38px 34px;
+    border-left:3px solid var(--stage-color);
+  }
+  section.stage::before{
+    content:attr(data-num);
+    position:absolute;
+    left:-19px;
+    top:38px;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:var(--stage-color);
+    color:#fff;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:700;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 0 6px var(--paper);
+  }
+  section.stage .stage-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px 20px;
+    margin-bottom:4px;
+  }
+  section.stage .stage-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--stage-color);
+  }
+  section.stage h2{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:23px;
+    font-weight:700;
+    margin:4px 0 6px;
+    letter-spacing:-.005em;
+  }
+  section.stage .duration{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    font-weight:600;
+    color:#fff;
+    background:var(--stage-color);
+    padding:4px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+
+  /* card blocks inside a stage */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+    margin:18px 0;
+  }
+  .card h3{
+    margin:0 0 10px;
+    font-size:14px;
+    font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--stage-color);
+  }
+  .card ul, .card ol{margin:0;padding-left:20px;}
+  .card li{margin-bottom:6px;}
+  .card p{margin:0 0 10px;}
+  .card p:last-child{margin-bottom:0;}
+
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:640px){ .grid-2{grid-template-columns:1fr;} }
+
+  /* objetivos list */
+  .objetivos li::marker{color:var(--stage-color);font-weight:700;}
+
+  /* pipeline mini-diagram fuentes->procesamiento->almacenamiento->consumo */
+  .flow{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    flex-wrap:wrap;
+    margin:6px 0 4px;
+  }
+  .flow .fbox{
+    flex:1 1 130px;
+    background:var(--paper);
+    border:1.5px solid var(--stage-color);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:13.5px;
+    text-align:center;
+    font-weight:600;
+    color:var(--ink);
+    min-width:120px;
+  }
+  .flow .farrow{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 8px;
+    color:var(--stage-color);
+    font-size:18px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  /* code blocks */
+  pre{
+    background:var(--code-bg);
+    color:var(--code-text);
+    padding:18px 20px;
+    border-radius:10px;
+    overflow-x:auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    line-height:1.6;
+    margin:14px 0;
+  }
+  pre .c1{color:#8B93A1;} /* comments */
+  pre .kw{color:var(--code-accent);font-weight:600;}
+  pre .str{color:#8FC9B0;}
+
+  /* comparison table */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+    margin:14px 0;
+  }
+  table th, table td{
+    text-align:left;
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table th{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--stage-color);
+    border-bottom:2px solid var(--stage-color);
+  }
+
+  /* verification questions */
+  .check{
+    border:1.5px dashed var(--stage-color);
+    border-radius:10px;
+    padding:16px 20px;
+    background:color-mix(in srgb, var(--stage-color) 6%, var(--paper));
+  }
+  .check h3{color:var(--stage-color);}
+  .check ol{padding-left:18px;}
+  .check li{margin-bottom:8px;}
+
+  /* materials chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:5px 10px;
+    border-radius:6px;
+    background:color-mix(in srgb, var(--stage-color) 12%, #fff);
+    color:var(--stage-color);
+    border:1px solid color-mix(in srgb, var(--stage-color) 35%, #fff);
+  }
+
+  /* footer */
+  footer{
+    margin-top:20px;
+    padding:30px 0 10px 34px;
+    border-left:3px solid var(--line);
+  }
+  footer p{color:var(--ink-soft);font-size:13.5px;max-width:65ch;}
+  footer .eyebrow{margin-bottom:8px;display:block;}
+
+  @media print{
+    body{background:#fff;}
+    .card{break-inside:avoid;}
+    section.stage{break-inside:avoid-page;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="eyebrow">Plan de clase · 120 minutos · Nivel introductorio</span>
+  <h1>De datos crudos a datos listos para decidir</h1>
+  <p class="lede">Clase introductoria de ingeniería de datos: panorama general, ETL y EDA. Pensada para estudiantes sin experiencia previa en el tema, con ejemplos guiados y práctica integradora.</p>
+
+  <div class="meta">
+    <div><strong>Duración total</strong> · 2 horas (120 min)</div>
+    <div><strong>Modalidad</strong> · Expositiva + práctica guiada</div>
+    <div><strong>Nivel</strong> · Introductorio, sin prerrequisitos</div>
+  </div>
+
+  <div class="pipeline">
+    <div class="pipeline-bar">
+      <span style="width:12.5%; background:var(--s0);"></span>
+      <span style="width:20.8%; background:var(--s1);"></span>
+      <span style="width:29.2%; background:var(--s2);"></span>
+      <span style="width:25%; background:var(--s3);"></span>
+      <span style="width:12.5%; background:var(--s4);"></span>
+    </div>
+    <div class="pipeline-labels">
+      <div style="width:12.5%;"><b style="color:var(--s0);">Inicio</b><span class="min">15 min</span></div>
+      <div style="width:20.8%;"><b style="color:var(--s1);">Bloque 1 · Intro</b><span class="min">25 min</span></div>
+      <div style="width:29.2%;"><b style="color:var(--s2);">Bloque 2 · ETL</b><span class="min">35 min</span></div>
+      <div style="width:25%;"><b style="color:var(--s3);">Bloque 3 · EDA</b><span class="min">30 min</span></div>
+      <div style="width:12.5%;"><b style="color:var(--s4);">Cierre</b><span class="min">15 min</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ACTIVIDAD INICIAL -->
+  <section class="stage" data-num="0" style="--stage-color:var(--s0);">
+    <div class="stage-head">
+      <div>
+        <div class="stage-eyebrow">Apertura</div>
+        <h2>Actividad inicial — Del dato crudo a la decisión</h2>
+      </div>
+      <span class="duration">15 min</span>
+    </div>
+
+    <div class="card objetivos">
+      <h3>Objetivo de aprendizaje</h3>
+      <ul>
+        <li>Reconocer, a partir de un ejemplo cotidiano, la diferencia entre "dato tal cual aparece" y "dato listo para responder una pregunta".</li>
+        <li>Conectar esa diferencia con el problema que resuelve la ingeniería de datos.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Dinámica: "Del recibo a la decisión"</h3>
+      <p>Se proyecta o entrega en parejas un ticket de compra de supermercado y una captura de mensajes de WhatsApp donde un pequeño negocio registra sus ventas del día (nombre de producto, cantidad y precio escritos de forma libre e inconsistente).</p>
+      <ol>
+        <li>Cada pareja tiene 5 minutos para responder: <em>"¿Cuál fue el producto más vendido esta semana?"</em> usando solo esa información.</li>
+        <li>Puesta en común (5 min): casi nadie puede responder con seguridad. Se anota en el tablero qué les faltó (orden, formato consistente, consolidación de varios días).</li>
+        <li>Cierre de la dinámica (5 min): se nombra el problema — los datos existen, pero no están listos para usarse. Ese es el problema que resuelve la ingeniería de datos.</li>
+      </ol>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Materiales</h3>
+        <div class="chips">
+          <span class="chip">Ticket de compra (imagen)</span>
+          <span class="chip">Chat de ventas simulado</span>
+          <span class="chip">Tablero / papelógrafo</span>
+          <span class="chip">Temporizador</span>
+        </div>
+      </div>
+      <div class="check">
+        <h3>Preguntas de verificación</h3>
+        <ol>
+          <li>¿Qué diferencia hay entre el dato "tal cual aparece" y el dato que necesitarían para decidir?</li>
+          <li>¿Qué pasos creen que hacen falta para pasar de uno a otro?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOQUE 1 -->
+  <section class="stage" data-num="1" style="--stage-color:var(--s1);">
+    <div class="stage-head">
+      <div>
+        <div class="stage-eyebrow">Bloque 1</div>
+        <h2>Introducción a la ingeniería de datos</h2>
+      </div>
+      <span class="duration">25 min</span>
+    </div>
+
+    <div class="card objetivos">
+      <h3>Objetivos de aprendizaje</h3>
+      <ul>
+        <li>Explicar qué es la ingeniería de datos y su rol dentro del ciclo de vida del dato.</li>
+        <li>Diferenciar ingeniería de datos, ciencia de datos y analítica según la pregunta que cada una responde.</li>
+        <li>Describir, en panorama general, las etapas de un pipeline de datos.</li>
+        <li>Reconocer herramientas y roles comunes del área (mención breve).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>¿Qué es la ingeniería de datos?</h3>
+      <p>Es la disciplina que diseña y construye los sistemas que mueven, transforman y ponen a disposición los datos de forma confiable, para que otras personas o sistemas (analistas, científicos de datos, modelos de IA) puedan usarlos. En el ciclo de vida del dato — generación → recolección → almacenamiento → procesamiento → análisis/consumo — el ingeniero de datos trabaja sobre todo en la recolección, el almacenamiento y el procesamiento.</p>
+    </div>
+
+    <div class="card">
+      <h3>Ingeniería de datos vs. ciencia de datos vs. analítica</h3>
+      <table>
+        <tr><th>Disciplina</th><th>Pregunta que responde</th><th>Entregable típico</th></tr>
+        <tr><td>Ingeniería de datos</td><td>¿Cómo llevamos el dato de la fuente al destino de forma confiable y a tiempo?</td><td>Pipelines, bases de datos, infraestructura</td></tr>
+        <tr><td>Analítica de datos</td><td>¿Qué pasó y por qué?</td><td>Reportes, dashboards</td></tr>
+        <tr><td>Ciencia de datos</td><td>¿Qué es probable que pase?</td><td>Modelos predictivos</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Panorama general de un pipeline de datos</h3>
+      <div class="flow">
+        <div class="fbox">Fuentes<br><span style="font-weight:400;color:var(--ink-soft);font-size:12px;">BD, APIs, archivos, sensores</span></div>
+        <div class="farrow">→</div>
+        <div class="fbox">Procesamiento<br><span style="font-weight:400;color:var(--ink-soft);font-size:12px;">limpieza, transformación</span></div>
+        <div class="farrow">→</div>
+        <div class="fbox">Almacenamiento<br><span style="font-weight:400;color:var(--ink-soft);font-size:12px;">data warehouse, data lake</span></div>
+        <div class="farrow">→</div>
+        <div class="fbox">Consumo<br><span style="font-weight:400;color:var(--ink-soft);font-size:12px;">dashboards, reportes, modelos</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Herramientas y roles comunes (mención)</h3>
+      <div class="chips">
+        <span class="chip">SQL</span>
+        <span class="chip">Python</span>
+        <span class="chip">Apache Airflow</span>
+        <span class="chip">Spark</span>
+        <span class="chip">AWS / GCP / Azure</span>
+        <span class="chip">Data Engineer</span>
+        <span class="chip">Data Analyst</span>
+        <span class="chip">Data Scientist</span>
+        <span class="chip">Analytics Engineer</span>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Materiales</h3>
+        <div class="chips">
+          <span class="chip">Diagrama del pipeline</span>
+          <span class="chip">Ejemplos reales cercanos</span>
+        </div>
+      </div>
+      <div class="check">
+        <h3>Preguntas de verificación</h3>
+        <ol>
+          <li>En sus palabras, ¿qué hace un ingeniero de datos que no hace un científico de datos?</li>
+          <li>Si una app de streaming quiere recomendar series, ¿en qué etapa del pipeline interviene primero el ingeniero de datos?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOQUE 2: ETL -->
+  <section class="stage" data-num="2" style="--stage-color:var(--s2);">
+    <div class="stage-head">
+      <div>
+        <div class="stage-eyebrow">Bloque 2</div>
+        <h2>ETL — Extract, Transform, Load</h2>
+      </div>
+      <span class="duration">35 min</span>
+    </div>
+
+    <div class="card objetivos">
+      <h3>Objetivos de aprendizaje</h3>
+      <ul>
+        <li>Explicar qué ocurre en cada etapa de un proceso ETL, con ejemplos concretos.</li>
+        <li>Diferenciar ETL de ELT y cuándo conviene cada enfoque.</li>
+        <li>Seguir un mini-pipeline ETL guiado.</li>
+        <li>Identificar errores comunes y buenas prácticas al diseñar un proceso ETL.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Las tres etapas</h3>
+      <ul>
+        <li><strong>Extract (extraer):</strong> obtener los datos de una o varias fuentes. Ej.: exportar las ventas de un sistema POS, consumir una API del clima, leer un CSV subido por un usuario.</li>
+        <li><strong>Transform (transformar):</strong> limpiar, estandarizar, combinar y calcular. Ej.: unificar formatos de fecha, eliminar duplicados, convertir monedas, calcular totales por producto.</li>
+        <li><strong>Load (cargar):</strong> escribir el resultado en un destino. Ej.: una tabla en un data warehouse o en una base de datos analítica.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>ETL vs. ELT</h3>
+      <table>
+        <tr><th>Enfoque</th><th>Cuándo transforma</th><th>Se usa cuando…</th></tr>
+        <tr><td>ETL</td><td>Antes de cargar, en un motor intermedio</td><td>El destino tiene poca capacidad de cómputo o hay reglas estrictas de calidad antes de guardar</td></tr>
+        <tr><td>ELT</td><td>Después de cargar, dentro del propio almacén</td><td>El destino es un warehouse cloud potente (BigQuery, Snowflake) y conviene guardar el dato crudo primero</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Ejemplo guiado: mini-pipeline ETL</h3>
+      <p>Partimos de un CSV de ventas con columnas desordenadas y construimos una tabla limpia de ventas por producto y día.</p>
+      <pre><span class="c1">-- EXTRACT: datos crudos de la tabla de origen</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> ventas_raw;
+<span class="c1">-- fecha en texto, precio con símbolo "$", producto con espacios extra</span>
+
+<span class="c1">-- TRANSFORM: limpieza y estandarización</span>
+<span class="kw">SELECT</span>
+  TRIM(producto)                          <span class="kw">AS</span> producto,
+  CAST(REPLACE(precio, <span class="str">'$'</span>, <span class="str">''</span>) <span class="kw">AS</span> DECIMAL) <span class="kw">AS</span> precio,
+  TO_DATE(fecha, <span class="str">'DD/MM/YYYY'</span>)         <span class="kw">AS</span> fecha,
+  cantidad
+<span class="kw">FROM</span> ventas_raw
+<span class="kw">WHERE</span> cantidad <span class="kw">IS NOT NULL</span>;
+
+<span class="c1">-- LOAD: resultado agregado al destino final</span>
+<span class="kw">INSERT INTO</span> ventas_limpias
+<span class="kw">SELECT</span> producto, fecha, SUM(precio * cantidad) <span class="kw">AS</span> total_dia
+<span class="kw">FROM</span> ventas_transformadas
+<span class="kw">GROUP BY</span> producto, fecha;</pre>
+    </div>
+
+    <div class="card">
+      <h3>Errores comunes y buenas prácticas</h3>
+      <div class="grid-2">
+        <div>
+          <p style="font-weight:600;margin-bottom:6px;">Errores comunes</p>
+          <ul>
+            <li>No validar tipos de datos ni formatos.</li>
+            <li>Ignorar valores nulos o duplicados.</li>
+            <li>Mezclar la lógica de extracción con la de transformación.</li>
+            <li>No registrar logs ni manejar errores del proceso.</li>
+          </ul>
+        </div>
+        <div>
+          <p style="font-weight:600;margin-bottom:6px;">Buenas prácticas</p>
+          <ul>
+            <li>Documentar y versionar cada paso del pipeline.</li>
+            <li>Diseñar cargas idempotentes (evitar duplicar al reprocesar).</li>
+            <li>Separar claramente extracción, transformación y carga.</li>
+            <li>Definir reglas de calidad antes de cargar al destino final.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Materiales</h3>
+        <div class="chips">
+          <span class="chip">CSV de ventas de ejemplo</span>
+          <span class="chip">Editor SQL o pandas</span>
+          <span class="chip">Pizarra para el diagrama E-T-L</span>
+        </div>
+      </div>
+      <div class="check">
+        <h3>Preguntas de verificación</h3>
+        <ol>
+          <li>Den un ejemplo de transformación para un dataset con fechas en 3 formatos distintos.</li>
+          <li>¿En qué escenario elegirían ELT en lugar de ETL?</li>
+          <li>Mencionen un error común en ETL y cómo lo evitarían.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOQUE 3: EDA -->
+  <section class="stage" data-num="3" style="--stage-color:var(--s3);">
+    <div class="stage-head">
+      <div>
+        <div class="stage-eyebrow">Bloque 3</div>
+        <h2>EDA — Análisis Exploratorio de Datos</h2>
+      </div>
+      <span class="duration">30 min</span>
+    </div>
+
+    <div class="card objetivos">
+      <h3>Objetivos de aprendizaje</h3>
+      <ul>
+        <li>Explicar qué es el EDA y por qué se hace antes de modelar o reportar.</li>
+        <li>Aplicar técnicas básicas: estadísticas descriptivas, detección de nulos/outliers, visualizaciones típicas.</li>
+        <li>Seguir un ejemplo práctico corto de exploración sobre un dataset sencillo.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>¿Qué es y por qué se hace primero?</h3>
+      <p>El EDA es el proceso de examinar un dataset para entender su estructura, calidad y patrones antes de usarlo en un análisis o modelo. Evita que se construyan reportes o modelos sobre datos sucios o mal entendidos, algo que llevaría a conclusiones equivocadas.</p>
+    </div>
+
+    <div class="card">
+      <h3>Técnicas básicas</h3>
+      <ul>
+        <li><strong>Estadísticas descriptivas:</strong> media, mediana, desviación estándar, conteos por categoría.</li>
+        <li><strong>Valores nulos:</strong> calcular el porcentaje de datos faltantes por columna.</li>
+        <li><strong>Outliers:</strong> detectarlos con el rango intercuartílico y boxplots.</li>
+        <li><strong>Visualizaciones típicas:</strong> histogramas, boxplots, gráficos de dispersión, matrices de correlación.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Ejemplo práctico corto (pandas)</h3>
+      <p>Sobre el mismo dataset de ventas ya limpio, exploramos su estructura antes de reportar:</p>
+      <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+df = pd.read_csv(<span class="str">"ventas_limpias.csv"</span>)
+
+df.head()              <span class="c1"># primeras filas, vista rápida</span>
+df.describe()           <span class="c1"># media, min, max, desviación estándar</span>
+df.isnull().sum()       <span class="c1"># nulos por columna</span>
+
+<span class="c1"># outliers con rango intercuartílico</span>
+Q1 = df[<span class="str">"total_dia"</span>].quantile(<span class="str">0.25</span>)
+Q3 = df[<span class="str">"total_dia"</span>].quantile(<span class="str">0.75</span>)
+IQR = Q3 - Q1
+outliers = df[(df[<span class="str">"total_dia"</span>] &lt; Q1 - <span class="str">1.5</span>*IQR) | (df[<span class="str">"total_dia"</span>] &gt; Q3 + <span class="str">1.5</span>*IQR)]
+
+df[<span class="str">"total_dia"</span>].hist()   <span class="c1"># histograma de la distribución</span></pre>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Materiales</h3>
+        <div class="chips">
+          <span class="chip">Dataset de ventas o notas</span>
+          <span class="chip">Python + pandas + matplotlib</span>
+          <span class="chip">Alternativa: hoja de cálculo</span>
+        </div>
+      </div>
+      <div class="check">
+        <h3>Preguntas de verificación</h3>
+        <ol>
+          <li>¿Por qué no deberíamos construir un modelo o reporte directamente sin hacer EDA?</li>
+          <li>Si una columna tiene 40% de valores nulos, ¿qué decisiones podrían tomar?</li>
+          <li>¿Qué visualización usarían para detectar valores atípicos en una columna numérica?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- CIERRE -->
+  <section class="stage" data-num="4" style="--stage-color:var(--s4);">
+    <div class="stage-head">
+      <div>
+        <div class="stage-eyebrow">Cierre</div>
+        <h2>Práctica integradora</h2>
+      </div>
+      <span class="duration">15 min</span>
+    </div>
+
+    <div class="card objetivos">
+      <h3>Objetivo de aprendizaje</h3>
+      <ul>
+        <li>Aplicar, sobre un caso nuevo, lo visto en ETL y EDA de forma integrada.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Ejercicio</h3>
+      <p>Se entrega a cada grupo un archivo de ventas de una tienda con problemas típicos: fechas en formatos distintos, precios guardados como texto, columnas duplicadas y algunos valores faltantes. En grupos pequeños (10 min):</p>
+      <ol>
+        <li>Identificar qué pasos de <strong>Extract, Transform y Load</strong> aplicarían y en qué orden.</li>
+        <li>Listar al menos 3 pasos de <strong>EDA</strong> que harían antes de confiar en el dataset para un reporte.</li>
+      </ol>
+      <p>Puesta en común de 5 minutos: cada grupo comparte un hallazgo de ETL y uno de EDA.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Materiales</h3>
+        <div class="chips">
+          <span class="chip">Dataset de práctica con defectos intencionales</span>
+          <span class="chip">Guía de trabajo en grupo</span>
+        </div>
+      </div>
+      <div class="check">
+        <h3>Entregable / verificación</h3>
+        <ol>
+          <li>Lista escrita de pasos ETL por grupo, en orden.</li>
+          <li>Lista escrita de al menos 3 pasos de EDA por grupo.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="eyebrow">Nota para el instructor</span>
+    <p>Los tiempos son orientativos: la actividad inicial y el cierre son los más fáciles de ajustar si algún bloque se extiende. El dataset de ventas puede reutilizarse a lo largo de toda la clase (crudo en la actividad inicial y en ETL, limpio en EDA y en el cierre) para reforzar la idea de un único pipeline de principio a fin.</p>
+  </footer>
+
+</div>
+</body>
+</html>
